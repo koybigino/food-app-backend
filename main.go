@@ -23,5 +23,9 @@ func main() {
 	routers.HandleAuthRoute(app)
 
 	fmt.Println("Server start ...")
-	log.Fatal(app.Listen(fmt.Sprintf("%s", os.Getenv("APP_PORT"))))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = ":3000"
+	}
+	log.Fatal(app.Listen(fmt.Sprintf("%s", port)))
 }
