@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -18,10 +19,10 @@ func main() {
 		return c.SendString("hello world !")
 	})
 
-	routers.HandleUserRouter(app)
 	routers.HandleAuthRoute(app)
+	routers.HandleUserRouter(app)
 
 	fmt.Println("Server start ...")
 
-	log.Fatal(app.Listen(":8080"))
+	log.Fatal(app.Listen(os.Getenv("PORT")))
 }
