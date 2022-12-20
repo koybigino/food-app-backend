@@ -17,8 +17,8 @@ func Connection() *gorm.DB {
 	//	log.Fatalf("Some error occured. Err: %s", err)
 	//}
 
-	port, _ := strconv.Atoi(os.Getenv("Port"))
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=UTC", os.Getenv("Hostname"), os.Getenv("Username"), os.Getenv("Password"), os.Getenv("Database"), port)
+	port, _ := strconv.Atoi(os.Getenv("food-app-env-var/Port"))
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=UTC", os.Getenv("food-app-env-var/Hostname"), os.Getenv("food-app-env-var/Username"), os.Getenv("food-app-env-var/Password"), os.Getenv("food-app-env-var/Database"), port)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
