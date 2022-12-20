@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -22,5 +23,5 @@ func main() {
 	routers.HandleAuthRoute(app)
 
 	fmt.Println("Server start ...")
-	log.Fatal(app.Listen(":3000"))
+	log.Fatal(app.Listen(fmt.Sprintf("%s", os.Getenv("APP_PORT"))))
 }
