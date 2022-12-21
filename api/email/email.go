@@ -21,7 +21,8 @@ func SendEmail(templateEmailPath, token, username, toEmail string) {
 			Token    string
 			Username string
 			AppName  string
-		}{Token: token, Username: username, AppName: os.Getenv("APP_NAME")})
+			AppURL   string
+		}{Token: token, Username: username, AppName: os.Getenv("APP_NAME"), AppURL: os.Getenv("APP_URL") + "/email-verification"})
 	}
 
 	m := gomail.NewMessage()
