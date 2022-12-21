@@ -24,5 +24,5 @@ func main() {
 
 	fmt.Println("Server start ...")
 
-	log.Fatal(app.Listen(os.Getenv("PORT")))
+	log.Fatal(app.Listen(fmt.Sprintf(":%s", os.Getenv("PORT"))))
 }
