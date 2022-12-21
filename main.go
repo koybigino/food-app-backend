@@ -21,8 +21,14 @@ func main() {
 
 	routers.HandleAuthRoute(app)
 	routers.HandleUserRouter(app)
+	routers.HandleSectionRouter(app)
+	routers.HandleImageRouter(app)
 
 	fmt.Println("Server start ...")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
 
-	log.Fatal(app.Listen(fmt.Sprintf(":%s", os.Getenv("PORT"))))
+	log.Fatal(app.Listen(fmt.Sprintf(":%s", port)))
 }

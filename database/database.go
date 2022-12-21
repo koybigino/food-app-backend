@@ -12,6 +12,11 @@ import (
 )
 
 func Connection() *gorm.DB {
+	//err := godotenv.Load(".env")
+	//if err != nil {
+	//	log.Fatalf("Some error occured. Err: %s", err)
+	//}
+
 	port, _ := strconv.Atoi(os.Getenv("DB_PORT"))
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=UTC", os.Getenv("DATABASE_URL"), os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), port)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -22,7 +27,8 @@ func Connection() *gorm.DB {
 
 	fmt.Println("Database Connection succed !")
 
-	if err := db.AutoMigrate(&models.User{}); err != nil {
+	if err := db.AutoMigrate(&models.User{}, &models.Image{}, &models.Section{}); err != nil {
+		fmt.Println(err.Error())
 		panic("Error ro create the table")
 	}
 

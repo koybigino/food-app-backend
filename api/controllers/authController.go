@@ -44,23 +44,24 @@ func Login(c *fiber.Ctx) error {
 			"message": "Unauthorize, Please Validate your email !",
 		})
 	}
+	token := oauth2.CreateJWTToken(user.Id, user.UserName, user.Email)
 
-	if user.Token == "" {
-		token := oauth2.CreateJWTToken(user.Id, user.UserName, user.Email)
+	//if user.Token == "" {
+	//	token := oauth2.CreateJWTToken(user.Id, user.UserName, user.Email)
 
-		user.Token = token
-		err := db.Save(user).Error
+	//	user.Token = token
+	//	err := db.Save(user).Error
 
-		if err != nil {
-			c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": err.Error(),
-			})
-		}
-		user.Token = token
-	}
+	//	if err != nil {
+	//		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+	//			"error": err.Error(),
+	//		})
+	//	}
+	//	user.Token = token
+	//}
 
 	return c.JSON(fiber.Map{
-		"token":      user.Token,
+		"token":      token,
 		"token_type": "Bearer",
 	})
 }
