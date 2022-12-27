@@ -27,9 +27,11 @@ type UserResponse struct {
 
 type User struct {
 	UserResponse
-	Token    string `json:"token" validate:"jwt"`
-	IsActive bool   `json:"is-active"  validate:"boolean"`
-	Password string `json:"password" validate:"required,min=8" gorm:"unique"`
+	Token    string  `json:"token" validate:"jwt"`
+	IsActive bool    `json:"is-active"  validate:"boolean"`
+	Password string  `json:"password" validate:"required,min=8" gorm:"unique"`
+	Foods    []Food  `json:"foods" gorm:"foreignKey:UserId"`
+	Images   []Image `json:"images" gorm:"foreignKey:UserId"`
 }
 
 func ParseToUser(u *User, ur UserRequest) {

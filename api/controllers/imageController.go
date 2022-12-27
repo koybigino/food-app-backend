@@ -11,7 +11,7 @@ import (
 func GetAllImages(c *fiber.Ctx) error {
 	var images []models.Image
 
-	if err := db.Find(&images).Error; err != nil {
+	if err := db.Preload("Sections").Find(&images).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "bad Credentials !",
 		})
@@ -26,7 +26,7 @@ func GetImageById(c *fiber.Ctx) error {
 	id, _ := strconv.Atoi(c.Params("id"))
 	body := new(models.Image)
 
-	if err := db.First(&body, id).Error; err != nil {
+	if err := db.Preload("Sections").First(&body, id).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "bad Credentials !",
 		})
@@ -39,6 +39,7 @@ func GetImageById(c *fiber.Ctx) error {
 
 func CreateImage(c *fiber.Ctx) error {
 	body := new(models.Image)
+	img := models.Image{}
 
 	if err := c.BodyParser(body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -61,6 +62,26 @@ func CreateImage(c *fiber.Ctx) error {
 		})
 	}
 
+	db.Last(&img)
+
+	for _, section := range body.Sections {
+		s := new(models.Section)
+		s.Color = section.Color
+		s.Xmaxi = section.Xmaxi
+		s.Xmini = section.Xmini
+		s.Ymaxi = section.Ymaxi
+		s.Ymini = section.Ymini
+		s.Label = section.Label
+		s.ImageId = img.Id
+
+		if err := db.Create(s).Error; err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "bad Credentials !",
+				"error":   err.Error(),
+			})
+		}
+	}
+
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "Image creation ok !",
 		"image":   body,
@@ -68,10 +89,17 @@ func CreateImage(c *fiber.Ctx) error {
 }
 
 func DeleteImage(c *fiber.Ctx) error {
-	section := new(models.Image)
+	image := new(models.Image)
 	id, _ := strconv.Atoi(c.Params("id"))
 
-	if err := db.Delete(&section, id).Error; err != nil {
+	if err := db.Where("image_id = ?", id).Delete(&models.Section{}).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "bad Credentials !",
+			"error":   err.Error(),
+		})
+	}
+
+	if err := db.Delete(image, id).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "bad Credentials !",
 			"error":   err.Error(),

@@ -27,7 +27,7 @@ func Connection() *gorm.DB {
 
 	fmt.Println("Database Connection succed !")
 
-	if err := db.AutoMigrate(&models.User{}, &models.Image{}, &models.Section{}); err != nil {
+	if err := db.AutoMigrate(&models.User{}, &models.Image{}, &models.Section{}, &models.Date{}, &models.Disease{}, &models.Food{}); err != nil {
 		fmt.Println(err.Error())
 		panic("Error ro create the table")
 	}

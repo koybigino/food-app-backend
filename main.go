@@ -23,6 +23,7 @@ func main() {
 	routers.HandleUserRouter(app)
 	routers.HandleSectionRouter(app)
 	routers.HandleImageRouter(app)
+	routers.HandleFoodRouter(app)
 
 	fmt.Println("Server start ...")
 	port := os.Getenv("PORT")
