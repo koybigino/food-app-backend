@@ -29,7 +29,7 @@ func Connection() *gorm.DB {
 
 	if err := db.AutoMigrate(&models.User{}, &models.Image{}, &models.Section{}, &models.Date{}, &models.Disease{}, &models.Food{}); err != nil {
 		fmt.Println(err.Error())
-		panic("Error ro create the table")
+		panic("Error ro create the table instance")
 	}
 
 	return db
