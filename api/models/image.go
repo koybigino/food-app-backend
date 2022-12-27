@@ -8,6 +8,6 @@ type ImageBase struct {
 type Image struct {
 	Id int `json:"id" gorm:"PrimaryKey"`
 	ImageBase
-	UserId   int       `json:"user_id"`
+	UserId   int       `json:"user_id" validate:"required"`
 	Sections []Section `json:"sections" validate:"required" gorm:"foreignKey:ImageId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

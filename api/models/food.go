@@ -12,7 +12,7 @@ type FoodRequest struct {
 	Year                int     `json:"year" validate:"required"`
 	Month               int     `json:"month" validate:"required"`
 	Day                 int     `json:"day" validate:"required"`
-	UserId              int     `json:"user_id"`
+	UserId              int     `json:"user_id" validate:"required"`
 }
 
 type Food struct {

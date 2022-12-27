@@ -8,7 +8,7 @@ type Section struct {
 	Xmaxi   int    `json:"xmaxi" validate:"required"`
 	Ymini   int    `json:"ymini" validate:"required"`
 	Ymaxi   int    `json:"ymaxi" validate:"required"`
-	ImageId int    `json:"image_id"`
+	ImageId int    `json:"image_id" validate:"required"`
 }
 
 type SectionRequest struct {
