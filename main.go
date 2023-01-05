@@ -24,6 +24,9 @@ func main() {
 	routers.HandleSectionRouter(app)
 	routers.HandleImageRouter(app)
 	routers.HandleFoodRouter(app)
+	routers.HandleAlgorithmRouter(app)
+	routers.HandleSearchRouter(app)
+	routers.HandleHealthRouter(app)
 
 	fmt.Println("Server start ...")
 	port := os.Getenv("PORT")

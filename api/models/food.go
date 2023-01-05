@@ -3,6 +3,7 @@ package models
 type FoodRequest struct {
 	Name                string  `json:"name" validate:"required"`
 	Quantity            float32 `json:"quantity" validate:"required"`
+	NutritiveValue      float32 `json:"nutritive_value" validate:"required"`
 	Number              int     `json:"number" validate:"required"`
 	QuantityWater       float32 `json:"quantity_water" validate:"required"`
 	QuantityOtherLiquid float32 `json:"quantity_other_liquid" validate:"required"`
@@ -15,29 +16,38 @@ type FoodRequest struct {
 	UserId              int     `json:"user_id" validate:"required"`
 }
 
-type Food struct {
+type FoodEat struct {
 	Id                  int       `json:"id" gorm:"PrimaryKey"`
-	Name                string    `json:"name"`
-	Quantity            float32   `json:"quantity"`
 	Number              int       `json:"number"`
 	QuantityWater       float32   `json:"quantity_water"`
 	QuantityOtherLiquid float32   `json:"quantity_other_liquid"`
 	SportDuration       int       `json:"sport_duration"`
 	FruitLegume         bool      `json:"fruit_Legume" `
-	UserId              int       `json:"user_id"`
+	FoodId              int       `json:"food_id"`
 	Diseases            []Disease `json:"diseases" gorm:"many2many:food_diseases"`
 	Dates               []Date    `json:"dates" gorm:"many2many:food_dates"`
 }
 
-func ParseFoodRequestToFood(fr FoodRequest, f *Food) {
-	f.Name = fr.Name
-	f.Quantity = fr.Quantity
+type Food struct {
+	Id             int       `json:"id" gorm:"PrimaryKey"`
+	Name           string    `json:"name" gorm:"unique"`
+	NutritiveValue float32   `json:"nutritive_value"`
+	Quantity       float32   `json:"quantity"`
+	UserId         int       `json:"user_id"`
+	FoodEats       []FoodEat `json:"food-eat" gorm:"foreignKey:FoodId"`
+}
+
+type FoodFill struct {
+	Food
+	QuantityPerNutritiveValue float32 `json:"quantity_per_nutritive_value"`
+}
+
+func ParseFoodRequestToFoodEat(fr FoodRequest, f *FoodEat) {
 	f.Number = fr.Number
 	f.QuantityWater = fr.QuantityWater
 	f.QuantityOtherLiquid = fr.QuantityOtherLiquid
 	f.SportDuration = fr.SportDuration
 	f.FruitLegume = fr.FruitLegume
-	f.UserId = fr.UserId
 }
 
 func ParseFoodRequestToDate(fr FoodRequest, d *DateRequest) {
@@ -48,4 +58,19 @@ func ParseFoodRequestToDate(fr FoodRequest, d *DateRequest) {
 
 func ParseFoodRequestToDisease(fr FoodRequest, d *Disease) {
 	d.Name = fr.DiseaseName
+}
+
+func ParseFoodRequestToFood(fr FoodRequest, f *Food) {
+	f.Name = fr.Name
+	f.UserId = fr.UserId
+	f.NutritiveValue = fr.NutritiveValue
+	f.Quantity = fr.Quantity
+}
+
+func ParseFoodToFoodFill(fr Food, f *FoodFill) {
+	f.Quantity = fr.Quantity
+	f.Name = fr.Name
+	f.UserId = fr.UserId
+	f.NutritiveValue = fr.NutritiveValue
+	f.QuantityPerNutritiveValue = fr.Quantity / fr.NutritiveValue
 }

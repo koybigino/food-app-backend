@@ -46,19 +46,13 @@ func Login(c *fiber.Ctx) error {
 	}
 	token := oauth2.CreateJWTToken(user.Id, user.UserName, user.Email)
 
-	//if user.Token == "" {
-	//	token := oauth2.CreateJWTToken(user.Id, user.UserName, user.Email)
-
-	//	user.Token = token
-	//	err := db.Save(user).Error
-
-	//	if err != nil {
-	//		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-	//			"error": err.Error(),
-	//		})
-	//	}
-	//	user.Token = token
-	//}
+	user.Token = token
+	err := db.Save(user).Error
+	if err != nil {
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
 
 	return c.JSON(fiber.Map{
 		"token":      token,
@@ -155,5 +149,7 @@ func EmailVerification(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.SendString("User email verification successfully !")
+	return c.JSON(fiber.Map{
+		"messge": "User email verification successfully !",
+	})
 }

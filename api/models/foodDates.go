@@ -1,6 +1,6 @@
 package models
 
 type FoodDates struct {
-	FoodId int `json:"food_id"`
-	DateId int `json:"date_id"`
+	FoodEatId int `json:"food_eat_id"`
+	DateId    int `json:"date_id"`
 }

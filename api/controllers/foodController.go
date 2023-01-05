@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -12,7 +11,7 @@ import (
 func GetAllFoods(c *fiber.Ctx) error {
 	var Foods []models.Food
 
-	if err := db.Preload("Dates").Preload("Diseases").Find(&Foods).Error; err != nil {
+	if err := db.Preload("FoodEats").Find(&Foods).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "bad Credentials !",
 		})
@@ -23,14 +22,75 @@ func GetAllFoods(c *fiber.Ctx) error {
 	})
 }
 
+func GetAllFoodNumber(c *fiber.Ctx) error {
+	var Foods []models.Food
+	var number int
+
+	if err := db.Preload("FoodEats").Find(&Foods).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	number = 0
+
+	for _, f := range Foods {
+		for _, val := range f.FoodEats {
+			number = number + val.Number
+		}
+	}
+
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"number": number,
+	})
+
+}
+
+func GetTheFoodNumber(c *fiber.Ctx) error {
+	id, _ := strconv.Atoi(c.Params("id"))
+	body := new(models.Food)
+	var number int
+
+	if err := db.Preload("FoodEats").First(&body, id).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "bad Credentials !",
+		})
+	}
+
+	number = len(body.FoodEats)
+
+	for _, val := range body.FoodEats {
+		number = number + (val.Number - 1)
+	}
+
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"number": number,
+	})
+
+}
+
 func GetFoodById(c *fiber.Ctx) error {
 	id, _ := strconv.Atoi(c.Params("id"))
 	body := new(models.Food)
 
-	if err := db.Preload("Dates").Preload("Diseases").First(&body, id).Error; err != nil {
+	if err := db.Preload("FoodEats").First(&body, id).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "bad Credentials !",
 		})
+	}
+
+	for i := 0; i < len(body.FoodEats); i++ {
+		fe := models.FoodEat{}
+		fe.Id = body.FoodEats[i].Id
+		if err := db.Preload("Dates").Preload("Diseases").First(&fe).Error; err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "bad Credentials !",
+			})
+		}
+
+		body.FoodEats[i].Dates = fe.Dates
+		body.FoodEats[i].Diseases = fe.Diseases
+
 	}
 
 	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
@@ -41,6 +101,7 @@ func GetFoodById(c *fiber.Ctx) error {
 func CreateFood(c *fiber.Ctx) error {
 	body := new(models.FoodRequest)
 	food := new(models.Food)
+	foodEat := new(models.FoodEat)
 	dateRequest := new(models.DateRequest)
 	date := new(models.Date)
 	disease := new(models.Disease)
@@ -61,14 +122,30 @@ func CreateFood(c *fiber.Ctx) error {
 		})
 	}
 
-	fmt.Println(body)
-
 	models.ParseFoodRequestToDate(*body, dateRequest)
 	models.ParseFoodRequestToFood(*body, food)
 	models.ParseFoodRequestToDisease(*body, disease)
 	models.GenerateDate(*dateRequest, date)
+	models.ParseFoodRequestToFoodEat(*body, foodEat)
 
 	if err := db.Create(food).Error; err != nil {
+		if err.Error() == "ERROR: duplicate key value violates unique constraint \"foods_name_key\" (SQLSTATE 23505)" {
+			db.Where("name = ?", food.Name).First(food)
+		} else {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		}
+	}
+
+	if food.Id == 0 {
+		food = &models.Food{}
+
+		db.Last(food)
+	}
+
+	foodEat.FoodId = food.Id
+	if err := db.Create(foodEat).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "bad Credentials !",
 			"error":   err.Error(),
@@ -76,29 +153,43 @@ func CreateFood(c *fiber.Ctx) error {
 	}
 
 	if err := db.Create(date).Error; err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "bad Credentials !",
-			"error":   err.Error(),
-		})
+		if err.Error() == "ERROR: duplicate key value violates unique constraint \"dates_date_key\" (SQLSTATE 23505)" {
+			db.Where("date = ?", date.Date).First(date)
+		} else {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		}
 	}
 
 	if err := db.Create(disease).Error; err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "bad Credentials !",
-			"error":   err.Error(),
-		})
+		if err.Error() == "ERROR: duplicate key value violates unique constraint \"diseases_name_key\" (SQLSTATE 23505)" {
+			db.Where("name = ?", disease.Name).First(disease)
+		} else {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		}
 	}
 
-	food = &models.Food{}
-	date = &models.Date{}
-	disease = &models.Disease{}
+	if date.Id == 0 {
+		date = &models.Date{}
 
-	db.Last(food)
-	db.Last(date)
-	db.Last(disease)
+		db.Last(date)
+	}
+
+	if disease.Id == 0 {
+		disease = &models.Disease{}
+
+		db.Last(disease)
+	}
+
+	foodEat = &models.FoodEat{}
+
+	db.Last(foodEat)
 
 	foodDate.DateId = date.Id
-	foodDate.FoodId = food.Id
+	foodDate.FoodEatId = foodEat.Id
 	if err := db.Create(foodDate).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "bad Credentials !",
@@ -107,7 +198,7 @@ func CreateFood(c *fiber.Ctx) error {
 	}
 
 	foodDisease.DiseaseId = disease.Id
-	foodDisease.FoodId = food.Id
+	foodDisease.FoodEatId = foodEat.Id
 	if err := db.Create(foodDisease).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "bad Credentials !",
