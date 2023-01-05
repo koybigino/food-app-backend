@@ -9,4 +9,5 @@ func HandleHealthRouter(api *fiber.App) {
 	router := api.Group("/foods/health")
 
 	router.Get("/:id<int>", controllers.Health)
+	router.Get("/:name", controllers.HealthName)
 }
